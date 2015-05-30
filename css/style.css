@@ -1,0 +1,32 @@
+/* Empty. Add your own CSS if you like */
+
+.sticky {
+    position:absolute;
+    top:40px;
+    z-index:1000;
+}
+.seccionSecundaria {
+    top:-1000px;
+    position:absolute;
+    z-index:100;
+    display:none;
+}
+.seccionInicial {
+    position:absolute;
+}
+.productoReservaInicial {
+    position:absolute;
+    top:40px;
+}
+
+.productoReservaSecundario {
+    position:absolute;
+    top:40px;
+    display:none;
+}
+.seccionReserva {
+    display:inline-block;
+}
+.seccionIngreso {
+    display:inline-block;
+}

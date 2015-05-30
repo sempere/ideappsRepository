@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <title></title>
+
+        <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">
+
+        <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+        <link href="css/ionic.app.css" rel="stylesheet">
+        -->
+        <!-- ionic/angularjs js -->
+        <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+        <!-- cordova script (this will be a 404 during development) -->
+        <script src="ng-cordova.min.js"></script>
+        <script src="cordova.js"></script>
+
+        <script src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+        <script src="js/transitionPlugin.js"></script>
+
+        <!-- your app's js -->
+        <script src="js/app.js"></script>
+        <script src="js/controllers.js"></script>
+        <script src="js/services.js"></script>
+
+
+    </head>
+    <body ng-app="financeApp"  ng-controller="MainController">
+        <!--
+          The nav bar that will be updated as we navigate between views.
+        -->
+        <!--
+          The views will be rendered in the <ion-nav-view> directive below
+          Templates are in the /templates folder (but you could also
+          have tempslates inline in this html file if you'd like).
+        -->
+
+    <ion-nav-bar class="bar-positive">
+    </ion-nav-bar>
+
+    <ion-nav-view></ion-nav-view>
+
+    <script type="text/ng-template" id="templates/sign-in.html">
+        <ion-view title="Login">
+        <ion-content padding="true">
+        <h2>¡Bienvenido a FinansApp!</h2>
+        <div class="list">
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Usuario</span>
+        <input type="text" placeholder="Usuario" ng-model="login.usuario">
+        </label>
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Clave</span>
+        <input type="text" placeholder="Clave" ng-model="login.clave">
+        </label>
+        </div>
+        <button class="button button-block button-positive" ng-click="crearUsuario(login.usuario, login.clave);">
+        Acceder
+        </button>
+        </ion-content>
+        </ion-view>
+    </script>
+
+    <script id="templates/tabs.html" type="text/ng-template">
+        <ion-view>
+        <ion-tabs class="tabs-icon-top tabs-positive">
+
+        <ion-tab title="Finanzas" icon="ion-home" href="#/tab/finanzas">
+        <ion-nav-view name="finanzas-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Ingresos" icon="ion-home" href="#/tab/ingresos">
+        <ion-nav-view name="ingresos-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Gastos" icon="ion-ios-information" href="#/tab/gastos">
+        <ion-nav-view name="gastos-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Productos" icon="ion-ios-information" href="#/tab/productos">
+        <ion-nav-view name="productos-tab"></ion-nav-view>
+        </ion-tab>
+
+        <ion-tab title="Sign-Out" icon="ion-log-out" href="#/sign-in">
+        </ion-tab>
+
+        </ion-tabs>
+        </ion-view>
+    </script>
+
+    <script type="text/ng-template" id="templates/finanzas.html">
+
+        <ion-view title="Finanzas">
+
+        <ion-content padding="true">
+        <h2>¡Bienvenido a FinansApp!</h2>
+        <div class="row">
+        <div class="col col-50">Capital: </div>
+        <div class="col">{{capital}}</div>
+        </div>
+        </ion-content>
+
+        </ion-view>
+
+    </script>
+
+    <script type="text/ng-template" id="templates/ingresos.html">
+
+       <ion-view title="Ingresos" ng-controller="IngresosController">
+
+       <ion-content padding="true">
+
+       <div class="seccionInicial">
+
+            <div class="list">
+
+                <div class="row">
+                    <div class="col col-50">
+                    <label class="item item-input item-floating-label">
+                    <span class="input-label">Importe</span>
+                    <input type="number" placeholder="Importe" ng-model="ingreso.cantidad" ng-change="fillDescripcionIngreso(ingreso.cantidad)">
+                    </label>
+                    </div>
+
+                    <div class="col">
+                    <label class="item item-input item-floating-label">
+                    <span class="input-label">Descripcion</span>
+                    <input type="text" placeholder="Descripcion" ng-model="ingreso.nombre">
+                    </label>
+                    </div>
+
+                </div>
+
+                <ion-radio ng-repeat="item in opcionesIngreso"
+                ng-value="item.value"
+                ng-checked="item.selected"
+                ng-model="ingreso.opcion"
+                        ng-click="checkOpcionIngreso()">
+                {{ item.text }}
+                </ion-radio>
+
+                <div class="row">
+                    <button class="button button-block button-positive" ng-click="crearIngreso(ingreso);" ng-show="ingreso.nombre && ingreso.cantidad && ingreso.opcion === 'cir'">
+                    Guardar ingreso
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="seccionSecundaria">
+            <button class="button button-block button-positive" ng-click="guardarCambiosProductos()">
+            Guardar cambios
+            </button>
+
+            <div class="row">
+
+                <div class="col col-50">
+                    <label class="item item-input item-select">
+                    <div class="input-label">
+                    Tipo de ingreso
+                    </div>
+                    <select ng-model="ingreso.granuloTipoIngreso" ng-options="tipoIngreso.descripcion for tipoIngreso in lstTiposIngreso">
+                    </select>
+                    </label>
+                </div>
+
+                <div class="col">
+                    <label class="item item-input item-floating-label">
+                    <span class="input-label">Cantidad de tiempo</span>
+                    <input type="number" placeholder="Tiempo" ng-model="ingreso.tiempoTipoIngreso">
+                    </label>
+                </div>
+
+                <button class="button button-positive seccionIngreso" ng-click="doRepartoAutomatico()" ng-show="ingreso.granuloTipoIngreso">
+                Reparto automático
+                </button>
+
+            </div>
+
+            <h3>Productos</h3>
+            <ion-list>
+                <ion-item ng-repeat="producto in lstProductos | orderBy : '-prioridad.importancia'" ng-show="producto.nombre !== 'Reserva'">
+                {{getNombreProducto(producto)}}
+                <div class="input-label">
+                Acumulado
+                </div>
+                <input type="number" ng-model="producto.acumulacion" ng-disabled="true">
+                <div class="input-label">
+                +
+                </div>
+                <input type="number" ng-model="producto.nuevoIngreso" ng-change="actualizarDatosIngresos()">
+                <div class="input-label">
+                =
+                </div>
+                <input type="number" ng-model="producto.sumaAcumulacion" ng-disabled="true">
+                </ion-item>
+            </ion-list>
+
+            <button class="button button-block button-positive" ng-click="cancelarReparto();">
+            Cancelar
+            </button>
+        </div>
+
+        </ion-content>
+
+        <div class="productoReservaSecundario">
+            <div class="seccionReserva">
+            <ion-list>
+                <ion-item>
+                    {{getNombreProducto(lstProductos[lstProductos.length - 1])}}
+                    <div class="input-label">
+                        Acumulado
+                    </div>
+                    <input type="number" ng-model="lstProductos[lstProductos.length - 1].acumulacion" ng-disabled="true">
+                    <div class="input-label">
+                    +
+                    </div>
+                    <input type="number" ng-model="lstProductos[lstProductos.length - 1].nuevoIngreso" ng-disabled="true">
+                    <div class="input-label">
+                    -->
+                    </div>
+                    <input type="number" ng-model="lstProductos[lstProductos.length - 1].sumaAcumulacion" ng-disabled="true">
+                </ion-item>
+            </ion-list>
+            </div>
+
+            <div class="seccionIngreso">
+             <ion-list>
+                <ion-item>
+                    Ingreso
+                    <div class="cantidadIngreso">
+                        {{ingreso.cantidad}}
+                    </div>
+                </ion-item>
+            </ion-list>
+            </div>
+
+        </div>
+
+        </ion-view>
+
+    </script>
+
+    <script type="text/ng-template" id="templates/gastosRepartidos.html">
+
+        <ion-view title="Gastos" ng-controller="GastosController">
+
+        <div class="sticky">
+        <button class="button button-block button-positive" ng-click="crearGasto(gasto);">
+        Guardar gasto
+        </button>
+        </div>
+
+        <ion-content padding="true">
+
+        <div class="list">
+
+        <ion-list>
+        <ion-item ng-repeat="producto in lstProductos">
+        <div class="row">
+        <div class="col col-50">
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Importe</span>
+        <input type="number" placeholder="Importe" ng-model="gasto.importe">
+        </label>
+        </div>
+        <div class="col">
+        {{producto.nombre}}
+        </div>
+        </div>
+        </ion-item>
+        </ion-list>
+
+        </div>
+
+        </ion-content>
+
+        </ion-view>
+
+    </script>
+
+    <script type="text/ng-template" id="templates/gastos.html">
+        <ion-view title="Gastos" ng-controller="GastosController">
+
+        <div class="sticky">
+        <button class="button button-block button-positive" ng-click="crearGasto(gasto);" ng-show="gasto.nombre && gasto.cantidad">
+        Guardar gasto
+        </button>
+        </div>
+
+        <ion-content padding="true">
+
+        <div class="list">
+
+        <div class="row">
+        <div class="col col-50">
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Importe</span>
+        <input type="number" placeholder="Importe" ng-model="gasto.cantidad" ng-change="fillDescripcionGasto(gasto.cantidad)">
+        </label>
+        </div>
+
+        <div class="col">
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Descripcion</span>
+        <input type="text" placeholder="Descripcion" ng-model="gasto.nombre">
+        </label>
+        </div>
+
+        </div>
+
+        <ion-radio ng-repeat="item in opcionesGasto"
+        ng-value="item.value"
+        ng-checked="item.selected"
+        ng-model="gasto.opcion">
+        {{ item.text }}
+        </ion-radio>
+
+        <div class="row">
+        <div class="col">
+        <div class="listaProductos" ng-show="gasto.opcion === 'cgp'">
+        <h3>Productos</h3>
+        <ion-radio ng-repeat="producto in lstProductos"
+        ng-value="producto.nombre"
+        ng-model="gasto.opcionListaProducto" name="listaProductos">
+        {{ producto.nombre }}
+        </ion-radio>
+        </div>
+        </div>
+        </div>
+
+        </div>
+
+        </ion-content>
+
+        </ion-view>
+    </script>
+
+    <script type="text/ng-template" id="templates/productos.html">
+
+        <ion-view title="Productos"  ng-controller="ProductosController">
+
+        <ion-content padding="true">
+
+        <div class="seccionSecundaria">
+        <h3>Crear nuevo producto</h3>
+
+        <div class="list">
+
+        <div class="row">
+        <div class="col">
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Nombre</span>
+        <input type="text" placeholder="Nombre" ng-model="producto.nombre" ng-change="cambioCampos()">
+        </label>
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="col col-50">
+
+        <label class="item item-input item-select">
+        <div class="input-label">
+        Tipo
+        </div>
+        <select ng-model="producto.tipoProducto" ng-options="tipoProducto.descripcion for tipoProducto in lstTiposProducto" ng-change="cambioCampos()">
+        </select>
+        </label>
+
+        </div>
+
+        <div class="col col-50">
+
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Dinero</span>
+        <input type="number" placeholder="Dinero" ng-model="producto.prediccion" ng-change="cambioCampos()">
+        </label>
+
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="col col-50">
+
+        <label class="item item-input item-floating-label">
+        <span class="input-label">Tiempo</span>
+        <input type="number" placeholder="Tiempo" ng-model="producto.tiempoDefinido" ng-change="cambioCampos()">
+        </label>
+
+        </div>
+
+        <div class="col col-50">
+
+        <label class="item item-input item-select">
+        <div class="input-label">
+        Unidad de tiempo
+        </div>
+        <select ng-model="producto.granuloTiempo" ng-options="granuloTiempo.descripcion for granuloTiempo in lstGranulosTiempo" ng-change="cambioCampos()">
+        </select>
+        </label>
+
+        </div>
+        </div>
+
+        <div class="row">
+        <div class="col col-50">
+
+        <label class="item item-input item-select">
+        <div class="input-label">
+        Prioridad
+        </div>
+        <select ng-model="producto.prioridad" ng-options="prioridad.descripcion for prioridad in lstPrioridades" ng-change="cambioCampos()">
+        </select>
+        </label>
+
+        </div>
+
+        <div class="col col-50">
+        {{resultadoProducto}}
+        </div>
+
+        </div>
+
+        <div class="row">
+        <div class="col col-50">
+        <button class="button button-block button-positive" ng-click="crearProducto(producto);">
+        Crear
+        </button>
+        </div>
+        <div class="col">
+        <button class="button button-block button-positive" ng-click="abrirSeccionInicial();">
+        Cancelar
+        </button>
+        </div>
+        </div>
+
+        </div>
+        </div>
+
+        <div class="seccionInicial">
+
+        <button class="button button-block button-positive" ng-click="abrirSeccionSecundaria();">
+        Crear producto
+        </button>
+
+        <button class="button button-block button-positive" ng-click="guardarCambiosProductos();">
+        Guardar cambios
+        </button>
+
+        <h3>Productos</h3>
+        <ion-list>
+        <ion-item ng-repeat="producto in lstProductos" ng-show="producto.nombre !== 'Reserva'">
+        {{getNombreProducto(producto)}}
+        <div class="input-label">
+        Acumulado
+        </div>
+        <input type="number" ng-model="producto.acumulacion" ng-change="checkFraseMovimiento($index)">
+        <div ng-show="fraseMovimiento[$index]" class="row">
+        <div class="col col-15">
+        {{fraseMovimiento[$index]}}  ---->
+        </div>
+        <div class="col">
+        <label class="item item-input item-select">
+        <div class="input-label">
+        {{productoDestino[$index].nombre}}
+        </div>
+        <select ng-model="productoDestino[$index]" ng-options="producto.nombre for producto in lstProductos | filter:{nombre:'!{{producto.nombre}}'}">
+        </select>
+        </label>
+        </div>
+        <div class="col" ng-show="productoDestino[$index].nombre !== 'Reserva' && productoDestino[$index].nombre !== producto.nombre">
+        <button class="button button-block button-positive" ng-click="calcularAcumulacionesProductos($index);">
+        Mover
+        </button>
+        </div>
+        </div>
+        </ion-item>
+        </ion-list>
+
+        </div>
+
+        </ion-content>
+
+        <div class="productoReservaInicial">
+        <ion-list>
+        <ion-item>
+        {{getNombreProducto(lstProductos[lstProductos.length - 1])}}
+        <div class="input-label">
+        Acumulado
+        </div>
+        <input type="number" ng-model="lstProductos[lstProductos.length - 1].acumulacion" ng-disabled="true">
+        </ion-item>
+        </ion-list>
+        </div>
+
+        </ion-view>
+
+    </script>
+
+
+</body>
+
+
+</html>
