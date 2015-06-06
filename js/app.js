@@ -1,3 +1,11 @@
+var menuItems = [
+    {payload: '1', text: 'Never'},
+    {payload: '2', text: 'Every Night'},
+    {payload: '3', text: 'Weeknights'},
+    {payload: '4', text: 'Weekends'},
+    {payload: '5', text: 'Weekly'},
+];
+
 // Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
