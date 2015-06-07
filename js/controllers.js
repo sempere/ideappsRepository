@@ -374,6 +374,8 @@ app.controller("GastosController", function ($scope, mainFactory, $filter) {
         $scope.llamarWebService('gasto', 'post', {nombreProducto: gasto.opcionListaProducto, gasto: gasto, usuarioLogado: usuarioLogado}, function () {
             $scope.showAlert("Confirmación", "El gasto se ha creado correctamente");
             $scope.gasto = {};
+            $scope.cargarGastos();
+            $scope.abrirSeccionInicial();
         });
     };
 
@@ -392,6 +394,27 @@ app.controller("GastosController", function ($scope, mainFactory, $filter) {
             $scope.gasto.nombre = "";
         }
     };
+
+    $scope.cargarGastos = function () {
+        var filtro = {};
+        var fechaActual = new Date();
+        var primerDiaMesActual = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
+        $scope.gasto.fechaDesde = primerDiaMesActual;
+        if ($scope.gasto.fechaDesde) {
+            filtro.fechaDesde = $filter('date')($scope.gasto.fechaDesde, 'yyyy-MM-dd');
+        }
+        if ($scope.gasto.fechaHasta) {
+            filtro.fechaHasta = $filter('date')($scope.gasto.fechaHasta, 'yyyy-MM-dd');
+        }
+        $scope.llamarWebService('verGastos', 'post', filtro, function () {
+            $scope.lstGastos = $scope.resultado;
+            $scope.totalGastos = 0;
+            angular.forEach($scope.lstGastos, function (gastoGuardado) {
+                $scope.totalGastos += gastoGuardado.cantidad;
+            });
+        });
+    };
+    $scope.cargarGastos();
 });
 
 app.controller("IngresosController", function ($scope, mainFactory, $filter) {
@@ -532,6 +555,13 @@ app.controller("IngresosController", function ($scope, mainFactory, $filter) {
                 numeroProductos -= 2;
             }
         });
+    };
+
+    /*
+     * Funcion que muestra/oculta la seccion de la reserva en la vista de Ingresos
+     */
+    $scope.logicaSeccionReservaIngresos = function () {
+        $('.seccionReserva').fadeToggle()
     };
 });
 
